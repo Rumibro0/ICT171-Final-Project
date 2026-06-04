@@ -946,7 +946,7 @@ sudo apt install unzip -y
 On your **local Windows PC** (PowerShell):
 
 ```powershell
-scp -i C:\Users\YourName\Downloads\your-key.pem C:\path\to\zylosoft.zip azureuser@YOUR_AZURE_IP:/home/azureuser/
+scp -i C:\Users\YourName\Downloads\your-key.pem C:\path\to\zylosoft.zip azureuser@20.2.80.253:/home/azureuser/
 ```
 
 > **The zip must exist on your local PC first.** The `scp` command copies from your PC to the server. If the file is not on your PC, the command fails with `No such file or directory`. Locate the zip on your PC before running scp.
@@ -995,9 +995,9 @@ server {
         listen 443 ssl;
         root /var/www/html;
         index index.php index.html index.htm;
-        server_name www.yourDomain.com yourDomain.com;
-        ssl_certificate /etc/letsencrypt/live/yourDomain.com/fullchain.pem;
-        ssl_certificate_key /etc/letsencrypt/live/yourDomain.com/privkey.pem;
+        server_name www.20.2.80.253zylosoft.online 20.2.80.253zylosoft.online;
+        ssl_certificate /etc/letsencrypt/live/20.2.80.253zylosoft.online/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/20.2.80.253zylosoft.online/privkey.pem;
         include /etc/letsencrypt/options-ssl-nginx.conf;
         ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
         location / {
@@ -1010,15 +1010,15 @@ server {
 }
 
 server {
-        if ($host = www.yourDomain.com) {
+        if ($host = www.20.2.80.253zylosoft.online) {
                 return 301 https://$host$request_uri;
         }
-        if ($host = yourDomain.com) {
+        if ($host = 20.2.80.253zylosoft.online) {
                 return 301 https://$host$request_uri;
         }
         listen 80;
         listen [::]:80;
-        server_name www.yourDomain.com yourDomain.com;
+        server_name www.20.2.80.253zylosoft.online 20.2.80.253zylosoft.online;
         return 404;
 }
 NGINXEOF
@@ -1033,12 +1033,37 @@ sudo nginx -t && sudo systemctl reload nginx
 
 ### 11.6 First login
 
-Visit `https://yourDomain.com`. Admin panel at `https://yourDomain.com/panel/`:
+Visit `https://20.2.80.253zylosoft.online`. Admin panel at `https://20.2.80.253zylosoft.online/panel/`:
 
 - **Username:** `admin`
 - **Password:** `admin123`
 
 Change the admin password immediately.
+
+---
+
+## Common Problems Reference
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| `403 Forbidden` on domain | No index.html in `/var/www/html` | Create one with `sudo nano /var/www/html/index.html` |
+| `ERR_CONNECTION_TIMED_OUT` | Azure NSG port 80 not open | Add HTTP inbound rule in Azure Portal → Networking |
+| `ERR_CONNECTION_REFUSED` | UFW not allowing port 80 | `sudo ufw allow 'Nginx Full'` |
+| Browser fails but phone (mobile data) works | University WiFi blocking port 80 | Normal — server is fine, use domain name |
+| `ssh: No such file or directory` | Wrong key filename | Check exact filename with `dir` in PowerShell before using it |
+| `ssh: Permission denied (publickey)` | Wrong IP, wrong username, or wrong key | Use correct key filename, `azureuser@IP`, and the current Azure static IP |
+| TeamSpeak `disk I/O error` | Corrupted database from interrupted run | Delete all `.sqlitedb*` files, run manually to get fresh token |
+| TeamSpeak `port 30033 in use` | Ghost ts3server process still running | Disable service first, then `sudo pkill -9 ts3server && sudo fuser -k 30033/tcp` |
+| `command not found` running ts3server | Wrong working directory | Always `cd /home/teamspeak/ts3` before running `./ts3server` |
+| Nextcloud SSL cert not found | Wrong cert path in config | Use `/etc/letsencrypt/live/20.2.80.253zylosoft.online/` not `cloud.20.2.80.253zylosoft.online/` |
+| Nginx `conflicting server_name` | Certbot added cloud domain to default config | Remove `cloud.20.2.80.253zylosoft.online` from `/etc/nginx/sites-available/default` |
+| Nginx fails with wrong domain in cert path | Old domain left in default config | Replace all old domain references in `/etc/nginx/sites-available/default` |
+| VPN connects but no internet | UFW forward policy is DROP | Set `DEFAULT_FORWARD_POLICY="ACCEPT"` in `/etc/default/ufw` |
+| HTTPS doesn't work on raw IP | SSL certs require domain names | Always use `https://20.2.80.253zylosoft.online` — raw IP cannot be HTTPS |
+| `unzip: command not found` | unzip not installed by default | `sudo apt install unzip -y` |
+| `scp: No such file or directory` | Zip file not on local PC | Locate the zip on your PC before running scp |
+| Status page shows wrong domain | DOMAIN variable not updated in script | Edit `DOMAIN=` in `/usr/local/bin/server-status.sh` then rerun it |
+| Status page shows service Offline but it is running | Page not updated yet — cron runs every 5 min | Run `sudo /usr/local/bin/server-status.sh` then refresh browser |
 
 ---
 
@@ -1052,6 +1077,19 @@ Change the admin password immediately.
 - Minetest server setup: [https://wiki.minetest.net/Setting_up_a_server](https://wiki.minetest.net/Setting_up_a_server)
 - Nextcloud installation: [https://docs.nextcloud.com/server/latest/admin_manual/installation/](https://docs.nextcloud.com/server/latest/admin_manual/installation/)
 - Microsoft Azure VM documentation: [https://docs.microsoft.com/en-us/azure/virtual-machines/](https://docs.microsoft.com/en-us/azure/virtual-machines/)
+
+---
+
+## Generative AI Use Declaration
+
+In accordance with Murdoch University's policy on the use of generative AI tools, the following AI assistance was used in this project:
+
+| Tool | Purpose | Sections Affected |
+|------|---------|-------------------|
+| Claude (Anthropic) | Website and portal UI design assistance — generating HTML/CSS layout and styling for the web portal and status dashboard | Step 2.1 (index.html), Step 9 (status page HTML), Step 11 (ZyloSoft portal) |
+| Claude (Anthropic) | Troubleshooting guidance during server setup — diagnosing configuration errors and suggesting fixes | Documentation throughout |
+
+All server configuration, commands, and infrastructure decisions were made and verified by the student. AI-generated content was reviewed, tested, and adapted before use. No AI tool was used to generate assessment answers, reports, or academic writing submitted for marking.
 
 ---
 
