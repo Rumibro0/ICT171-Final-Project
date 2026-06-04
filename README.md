@@ -931,6 +931,117 @@ Should return `HTTP/1.1 200 OK`.
 
 ---
 
+## Step 11 — ZyloSoft Web Portal
+
+### 11.1 Install unzip first
+
+> **`unzip` is not installed by default on Ubuntu.** Install it before trying to deploy the portal or you will get `sudo: unzip: command not found`.
+
+```bash
+sudo apt install unzip -y
+```
+
+### 11.2 Upload the zip from your local PC
+
+On your **local Windows PC** (PowerShell):
+
+```powershell
+scp -i C:\Users\YourName\Downloads\your-key.pem C:\path\to\zylosoft.zip azureuser@YOUR_AZURE_IP:/home/azureuser/
+```
+
+> **The zip must exist on your local PC first.** The `scp` command copies from your PC to the server. If the file is not on your PC, the command fails with `No such file or directory`. Locate the zip on your PC before running scp.
+
+### 11.3 Deploy on the server
+
+```bash
+sudo unzip -o ~/zylosoft.zip -d /tmp/zs/
+sudo cp -r /tmp/zs/zylosoft/* /var/www/html/
+sudo chown -R www-data:www-data /var/www/html/
+sudo find /var/www/html -type d -exec chmod 755 {} \;
+sudo find /var/www/html -type f -exec chmod 644 {} \;
+```
+
+### 11.4 Remove the default index files
+
+```bash
+sudo rm -f /var/www/html/index.html
+sudo rm -f /var/www/html/index.nginx-debian.html
+sudo systemctl reload nginx
+```
+
+### 11.5 Replace the Nginx default config completely
+
+> **Do not just edit the default config — replace it entirely.** The default Ubuntu Nginx config has PHP commented out and points to `php7.4` instead of `php8.3`. If you only edit domain names without fixing the PHP block, the portal will show `403 Forbidden` because PHP files cannot be executed. Use the full replacement below.
+
+```bash
+sudo tee /etc/nginx/sites-available/default << 'NGINXEOF'
+server {
+        listen 80 default_server;
+        listen [::]:80 default_server;
+        root /var/www/html;
+        index index.php index.html index.htm;
+        server_name _;
+        location / {
+                try_files $uri $uri/ =404;
+        }
+        location ~ \.php$ {
+                include snippets/fastcgi-php.conf;
+                fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        }
+}
+
+server {
+        listen [::]:443 ssl ipv6only=on;
+        listen 443 ssl;
+        root /var/www/html;
+        index index.php index.html index.htm;
+        server_name www.yourDomain.com yourDomain.com;
+        ssl_certificate /etc/letsencrypt/live/yourDomain.com/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/yourDomain.com/privkey.pem;
+        include /etc/letsencrypt/options-ssl-nginx.conf;
+        ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+        location / {
+                try_files $uri $uri/ =404;
+        }
+        location ~ \.php$ {
+                include snippets/fastcgi-php.conf;
+                fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        }
+}
+
+server {
+        if ($host = www.yourDomain.com) {
+                return 301 https://$host$request_uri;
+        }
+        if ($host = yourDomain.com) {
+                return 301 https://$host$request_uri;
+        }
+        listen 80;
+        listen [::]:80;
+        server_name www.yourDomain.com yourDomain.com;
+        return 404;
+}
+NGINXEOF
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+> **Also remove `index.html` if portal still shows 403.** Nginx serves `index.html` before `index.php`. If a Hello World `index.html` exists in `/var/www/html`, it will be served instead of the portal:
+> ```bash
+> sudo rm -f /var/www/html/index.html
+> sudo systemctl reload nginx
+> ```
+
+### 11.6 First login
+
+Visit `https://yourDomain.com`. Admin panel at `https://yourDomain.com/panel/`:
+
+- **Username:** `admin`
+- **Password:** `admin123`
+
+Change the admin password immediately.
+
+---
+
 ## References
 
 - Ubuntu Server documentation: [https://ubuntu.com/server/docs](https://ubuntu.com/server/docs)
