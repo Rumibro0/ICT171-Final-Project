@@ -1,6 +1,8 @@
 
 # ICT171 Cloud Server Project — Complete Setup Guide
 
+**Student Name:** Muhammad Rumman  
+**Student ID:** 36006663  
 **Unit:** ICT171 — Introduction to Server Environments and Architectures  
 **Semester:** 2026 Semester 1  
 **Tested on:** Azure Ubuntu 24.04 LTS — all steps verified working
@@ -13,11 +15,11 @@
 
 | Item | Value |
 |------|-------|
-| Public IP Address | `YOUR_AZURE_IP` |
+| Public IP Address | `20.2.80.253` |
 | Domain Name | `yourDomain` |
 | GitHub Repository | `https://github.com/rumibro0/ICT171-Final-Project` |
 | Video Explainer | `https://youtu.be/[your-video-id]` |
-| Status Page | `https://yourDomain.com/status.html` |
+| Status Page | `https://zylosoft.online/status.html` |
 
 ---
 
@@ -29,12 +31,12 @@ This project builds a multi-purpose cloud server on Microsoft Azure running Ubun
 
 | Service | Technology | Address |
 |---------|------------|---------|
-| Website | Nginx | `https://yourDomain.com` |
-| VPN | WireGuard | `vpn.yourDomain.com:51820` |
-| Voice chat | TeamSpeak 3 | `ts.yourDomain.com:9987` |
-| Game server | Minetest | `game.yourDomain.com:30000` |
-| File storage | Nextcloud | `https://cloud.yourDomain.com` |
-| Status dashboard | Bash + cron | `https://yourDomain.com/status.html` |
+| Website | Nginx | `https://zylosoft.online` |
+| VPN | WireGuard | `vpn.zylosoft.online:51820` |
+| Voice chat | TeamSpeak 3 | `ts.zylosoft.online:9987` |
+| Game server | Minetest | `game.zylosoft.online:30000` |
+| File storage | Nextcloud | `https://cloud.zylosoft.online` |
+| Status dashboard | Bash + cron | `https://zylosoft.online/status.html` |
 
 ### Infrastructure
 
@@ -56,6 +58,8 @@ This project builds a multi-purpose cloud server on Microsoft Azure running Ubun
 
 Go to [https://azure.microsoft.com/en-au/get-started/azure-portal](https://azure.microsoft.com/en-au/get-started/azure-portal) and create an account.
 
+> If you have a Student ID then go to [azure.microsoft.com/en-au/free/students](https://azure.microsoft.com/en-au/free/students) and sign in with your university email. You receive $100 credit with no credit card required.
+
 ### 1.2 Create the virtual machine
 
 1. Log in to [portal.azure.com](https://portal.azure.com)
@@ -73,12 +77,14 @@ Go to [https://azure.microsoft.com/en-au/get-started/azure-portal](https://azure
 
 ### 1.3 Set a static public IP
 
+> **Do this before anything else.** Azure assigns a dynamic IP by default, which changes every time the VM restarts and breaks all your DNS records.
+
 1. Azure portal → your VM → **Networking → Public IP address**
 2. Click the IP name link → **Configuration**
 3. Change **Assignment** from **Dynamic** to **Static**
 4. Click **Save**
 
-Write down the IP — this is `YOUR_AZURE_IP` for the rest of this guide.
+Write down the IP — this is `20.2.80.253` for the rest of this guide.
 
 ### 1.4 Open firewall ports in Azure NSG
 
@@ -93,13 +99,22 @@ Azure portal → your VM → **Networking → Add inbound port rule**. Add all o
 | 51820 | UDP | WireGuard VPN |
 | 30000 | UDP | Minetest game server |
 
+> **Important:** Set Source to **Any** and Action to **Allow** for each rule. These rules must be present or your server will time out even when Nginx is running correctly.
+
 ### 1.5 Connect via SSH
 
 On Windows (PowerShell) or macOS/Linux terminal:
 
 ```bash
-ssh -i C:\Users\YourName\Downloads\your-key.pem azureuser@YOUR_AZURE_IP
+ssh -i C:\Users\YourName\Downloads\your-key.pem azureuser@20.2.80.253
 ```
+
+> **Three things must be correct or SSH will fail:**
+> - **Key filename** — the `.pem` file name must exactly match what you downloaded. Check with `dir` in PowerShell to confirm the exact filename before using it.
+> - **IP address** — use the current static IP shown in the Azure portal, not an old IP from a previous VM.
+> - **Username** — always specify `azureuser@IP`. Running `ssh -i key.pem IP` without the username fails with permission denied because SSH uses your local Windows username instead.
+
+> **Windows permissions error on the .pem file:** Right-click → Properties → Security → Advanced → disable inheritance → give only your user account Read permission.
 
 ### 1.6 Update the system
 
@@ -122,6 +137,9 @@ sudo ufw allow 30000/udp
 sudo ufw enable
 sudo ufw status
 ```
+
+> **`Nginx Full` is required.** This opens both port 80 and 443. If you skip this, the browser shows `ERR_CONNECTION_REFUSED` even though Nginx is running and the Azure NSG rule is correct. Both Azure NSG and UFW are independent firewalls — both must allow port 80.
+
 ---
 
 ## Step 2 — Install Nginx
@@ -148,6 +166,16 @@ curl http://localhost
 
 This should return HTML. If it does, Nginx is working correctly on the server side.
 
+> **If the browser shows `ERR_CONNECTION_TIMED_OUT` after installing Nginx**, there are two independent firewalls that both need to allow port 80 — Azure NSG and UFW. Check both:
+>
+> **Check 1 — Azure NSG:** Azure Portal → your VM → Networking. Confirm an inbound rule exists for port 80 TCP with Action = Allow. If missing, add it.
+>
+> **Check 2 — UFW:** Run `sudo ufw status` on the server. If port 80 is not listed, run `sudo ufw allow 'Nginx Full'`. This is why Step 1.7 must be completed before installing Nginx.
+>
+> A common sign that both firewalls need fixing: the error changes from `ERR_CONNECTION_TIMED_OUT` (Azure NSG blocking) to `ERR_CONNECTION_REFUSED` (UFW blocking) after you add the NSG rule. Fix UFW next and the site will load.
+
+> **Browser shows "site can't be reached" from your PC but works on mobile data.** This is common on university and corporate WiFi that blocks outbound port 80. Test on your phone with WiFi off — if it loads, your server is fine.
+
 ### 2.1 Deploy a custom website
 
 > **Do this immediately after installing Nginx.** If you delete the default `index.html` without replacing it, visiting your domain will show `403 Forbidden` because Nginx has no file to serve.
@@ -161,15 +189,15 @@ Paste this minimal page as a starting point — you can expand it later:
 ```html
 <!DOCTYPE html>
 <html>
-<head><title>yourDomain.com</title></head>
+<head><title>zylosoft.online</title></head>
 <body>
-  <h1>yourDomain.com Server</h1>
+  <h1>zylosoft.online Server</h1>
   <p>Services running on this server:</p>
   <ul>
-    <li><a href="https://cloud.yourDomain.com">Nextcloud File Storage</a></li>
-    <li>VPN: vpn.yourDomain.com:51820</li>
-    <li>TeamSpeak: ts.yourDomain.com:9987</li>
-    <li>Game Server: game.yourDomain.com:30000</li>
+    <li><a href="https://cloud.zylosoft.online">Nextcloud File Storage</a></li>
+    <li>VPN: vpn.zylosoft.online:51820</li>
+    <li>TeamSpeak: ts.zylosoft.online:9987</li>
+    <li>Game Server: game.zylosoft.online:30000</li>
     <li><a href="/status.html">Server Status</a></li>
   </ul>
 </body>
@@ -182,6 +210,8 @@ Save with `Ctrl+O` → Enter → `Ctrl+X`, then set correct ownership:
 sudo chown -R www-data:www-data /var/www/html
 ```
 
+> **403 Forbidden on your domain** means Nginx has no index file to serve. Either the file was never created or was accidentally deleted. Recreate it with the commands above.
+
 ---
 
 ## Step 3 — Configure DNS
@@ -190,18 +220,18 @@ Log in to your domain registrar and add the following A records, all pointing to
 
 | Type | Name | Value | TTL |
 |------|------|-------|-----|
-| A | `@` | `YOUR_AZURE_IP` | 300 |
-| A | `www` | `YOUR_AZURE_IP` | 300 |
-| A | `ts` | `YOUR_AZURE_IP` | 300 |
-| A | `vpn` | `YOUR_AZURE_IP` | 300 |
-| A | `game` | `YOUR_AZURE_IP` | 300 |
-| A | `cloud` | `YOUR_AZURE_IP` | 300 |
+| A | `@` | `20.2.80.253` | 300 |
+| A | `www` | `20.2.80.253` | 300 |
+| A | `ts` | `20.2.80.253` | 300 |
+| A | `vpn` | `20.2.80.253` | 300 |
+| A | `game` | `20.2.80.253` | 300 |
+| A | `cloud` | `20.2.80.253` | 300 |
 
 DNS changes take 5–30 minutes to propagate. Verify before moving to SSL:
 
 ```bash
-nslookup yourDomain.com
-nslookup cloud.yourDomain.com
+nslookup zylosoft.online
+nslookup cloud.zylosoft.online
 ```
 
 Both should return your Azure public IP.
@@ -220,14 +250,18 @@ Obtain certificates for all web-facing subdomains in one command:
 
 ```bash
 sudo certbot --nginx \
-  -d yourDomain.com \
-  -d www.yourDomain.com \
-  -d cloud.yourDomain.com
+  -d zylosoft.online \
+  -d www.zylosoft.online \
+  -d cloud.zylosoft.online
 ```
 
 Follow the prompts — enter your email address and accept the terms.
 
-
+> **Important — remember your certificate path.** Certbot stores all domains under one certificate named after the **first domain you gave it**. The paths will be:
+> - `/etc/letsencrypt/live/zylosoft.online/fullchain.pem`
+> - `/etc/letsencrypt/live/zylosoft.online/privkey.pem`
+>
+> When setting up Nextcloud in Step 8, use these exact paths. Do **not** use `/etc/letsencrypt/live/cloud.zylosoft.online/` — that path does not exist and will cause Nginx to fail.
 
 Verify auto-renewal:
 
@@ -281,7 +315,49 @@ PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING 
 
 Save with `Ctrl+O` → Enter → `Ctrl+X`.
 
-### 5.5 Add a client device
+### 5.5 Enable IP forwarding and fix UFW for VPN traffic
+
+Both parts are required or VPN clients will connect but have no internet access.
+
+**Part A — Enable IP forwarding:**
+
+```bash
+echo "net.ipv4.ip_forward=1" | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p
+```
+
+**Part B — Allow UFW to forward traffic:**
+
+```bash
+sudo nano /etc/default/ufw
+```
+
+Find `DEFAULT_FORWARD_POLICY="DROP"` and change it to:
+
+```
+DEFAULT_FORWARD_POLICY="ACCEPT"
+```
+
+Save and apply — **both commands required, in this order:**
+
+```bash
+sudo systemctl restart ufw
+sudo systemctl restart wg-quick@wg0
+```
+
+> **Both restarts are required.** Restarting UFW alone is not enough — WireGuard must also be restarted after the UFW change so it re-applies the iptables rules with the new forward policy in effect. If you restart UFW but not WireGuard, the VPN will still have no internet.
+
+**Verify WireGuard started correctly:**
+
+```bash
+sudo systemctl status wg-quick@wg0
+```
+
+`Active: active (exited)` with `status=0/SUCCESS` is correct — this is normal for WireGuard.
+
+> **This step is not optional — skipping it will break internet on the VPN.** After connecting, the WireGuard handshake will succeed and the tunnel will show as active, but all internet traffic will silently drop. Websites will time out, DNS will fail, nothing will load. The reason: UFW's default forward policy is DROP, which blocks WireGuard from forwarding your traffic out to the internet even though the iptables MASQUERADE rule in PostUp is correct. Changing `DEFAULT_FORWARD_POLICY` to `ACCEPT` is what actually allows traffic to flow through the tunnel. If you connect and lose internet, run the two restart commands above and reconnect.
+
+### 5.6 Add a client device
 
 Generate client keys on your Windows laptop (PowerShell):
 
@@ -329,10 +405,16 @@ DNS = 1.1.1.1
 
 [Peer]
 PublicKey = SERVER_PUBLIC_KEY
-Endpoint = YOUR_AZURE_IP:51820
+Endpoint = 20.2.80.253:51820
 AllowedIPs = 0.0.0.0/0
 PersistentKeepalive = 25
 ```
+
+> **Replace `20.2.80.253` in the Endpoint with your actual IP address.** If you leave the placeholder text `20.2.80.253` in the config, WireGuard will show "No such host is known" when you try to connect. The Endpoint line must be the real IP, for example `57.158.25.39:51820`. Use the raw IP until DNS is set up in Step 3, then you can change it to `vpn.zylosoft.online:51820`.
+
+Install the [WireGuard app](https://www.wireguard.com/install/), import `client.conf`, and activate. Verify at `whatismyip.com` — it should show your Azure IP.
+
+> **HTTPS does not work on raw IP addresses.** SSL certificates only work with domain names. Always access your server via `https://zylosoft.online` in the browser. SSH connections to the raw IP (`ssh -i key.pem azureuser@20.2.80.253`) are already encrypted — SSH is always secure regardless of IP or domain.
 
 ---
 
@@ -425,7 +507,45 @@ sudo systemctl start teamspeak
 sudo systemctl status teamspeak
 ```
 
-Connect via TeamSpeak 3 client — address: `YOUR_AZURE_IP`, port: `9987`. Paste the token when prompted.
+Connect via TeamSpeak 3 client — address: `20.2.80.253`, port: `9987`. Paste the token when prompted.
+
+### TeamSpeak token recovery / crash fix
+
+If TeamSpeak is crashing, failing to start, or you missed the token, this is almost always caused by a ghost ts3server process still holding port 30033. The systemd service keeps restarting faster than you can kill it, which corrupts the database. Follow these steps exactly — **do not skip the disable step**:
+
+```bash
+# Step 1: Stop AND disable the service so it stops restarting
+sudo systemctl stop teamspeak
+sudo systemctl disable teamspeak
+
+# Step 2: Kill every ts3server process and free the port
+sudo pkill -9 ts3server
+sudo fuser -k 30033/tcp
+sleep 2
+
+# Step 3: Confirm nothing is running (only the grep line should appear)
+ps aux | grep ts3server
+
+# Step 4: Delete the database
+sudo rm -f /home/teamspeak/ts3/ts3server.sqlitedb
+sudo rm -f /home/teamspeak/ts3/ts3server.sqlitedb-wal
+sudo rm -f /home/teamspeak/ts3/ts3server.sqlitedb-shm
+
+# Step 5: Run manually from the correct directory
+cd /home/teamspeak/ts3
+sudo -u teamspeak ./ts3server
+```
+
+Watch for the `token=` line, copy it, press `Ctrl+C`, then re-enable:
+
+```bash
+sudo systemctl enable teamspeak
+sudo systemctl start teamspeak
+```
+
+> **Why `systemctl disable` is required before killing.** If you only run `systemctl stop` and then `pkill`, systemd immediately restarts the process because `Restart=always` is set in the service file. The new process grabs port 30033 before you can run the next command, causing the same `bind failed` error again. Disabling the service first prevents systemd from restarting it so `pkill` actually sticks.
+
+> **Symptom of this problem:** TeamSpeak status shows `Start request repeated too quickly` and `Failed with result 'exit-code'`. The logs show `bind failed on 0.0.0.0:30033: Address already in use` or `disk I/O error`. Both are caused by the same root issue — a ghost process holding the port.
 
 ---
 
@@ -444,7 +564,7 @@ sudo nano /etc/minetest/minetest.conf
 ```ini
 server_name = My Game Server
 server_description = ICT171 Cloud Project
-server_address = game.yourDomain.com
+server_address = game.zylosoft.online
 port = 30000
 max_users = 10
 enable_damage = true
@@ -456,7 +576,7 @@ sudo systemctl start minetest-server
 sudo systemctl status minetest-server
 ```
 
-Connect: **Join Game → Address:** `YOUR_AZURE_IP` **Port:** `30000`.
+Connect: **Join Game → Address:** `20.2.80.253` **Port:** `30000`.
 
 ---
 
@@ -499,21 +619,21 @@ sudo chmod -R 755 /var/www/cloud
 
 ### 8.3 Create the Nginx server block
 
-> **Use the correct SSL certificate path.** Certbot stores the certificate under the first domain name you gave it (`yourDomain.com`), not under `cloud.yourDomain.com`. Use `/etc/letsencrypt/live/yourDomain.com/` in both ssl_certificate lines — the `cloud.yourDomain.com` path does not exist and will crash Nginx.
+> **Use the correct SSL certificate path.** Certbot stores the certificate under the first domain name you gave it (`zylosoft.online`), not under `cloud.zylosoft.online`. Use `/etc/letsencrypt/live/zylosoft.online/` in both ssl_certificate lines — the `cloud.zylosoft.online` path does not exist and will crash Nginx.
 
 ```bash
 sudo nano /etc/nginx/sites-available/nextcloud
 ```
 
-Paste this — replace `yourDomain.com` with your actual domain:
+Paste this — replace `zylosoft.online` with your actual domain:
 
 ```nginx
 server {
     listen 443 ssl;
-    server_name cloud.yourDomain.com;
+    server_name cloud.zylosoft.online;
 
-    ssl_certificate /etc/letsencrypt/live/yourDomain.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/yourDomain.com/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/zylosoft.online/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/zylosoft.online/privkey.pem;
     include /etc/letsencrypt/options-ssl-nginx.conf;
 
     root /var/www/cloud;
@@ -541,7 +661,7 @@ server {
 
 server {
     listen 80;
-    server_name cloud.yourDomain.com;
+    server_name cloud.zylosoft.online;
     return 301 https://$host$request_uri;
 }
 ```
@@ -552,20 +672,20 @@ Enable the nextcloud config:
 sudo ln -s /etc/nginx/sites-available/nextcloud /etc/nginx/sites-enabled/
 ```
 
-**Before reloading Nginx, fix the default config — this step is always required.** Certbot adds `cloud.yourDomain.com` to the default config when it issues the certificate, which causes the default config to intercept Nextcloud traffic and serve "Hello World" instead of Nextcloud. You must remove it manually:
+**Before reloading Nginx, fix the default config — this step is always required.** Certbot adds `cloud.zylosoft.online` to the default config when it issues the certificate, which causes the default config to intercept Nextcloud traffic and serve "Hello World" instead of Nextcloud. You must remove it manually:
 
 ```bash
-sudo grep -n "cloud.yourDomain.com" /etc/nginx/sites-enabled/default
+sudo grep -n "cloud.zylosoft.online" /etc/nginx/sites-enabled/default
 ```
 
 This will show lines like:
 
 ```
-115:    server_name yourDomain.com cloud.yourDomain.com www.yourDomain.com;
-173:    server_name yourDomain.com cloud.yourDomain.com www.yourDomain.com;
+115:    server_name zylosoft.online cloud.zylosoft.online www.zylosoft.online;
+173:    server_name zylosoft.online cloud.zylosoft.online www.zylosoft.online;
 ```
 
-Open the default config and remove `cloud.yourDomain.com` from every `server_name` line it appears in:
+Open the default config and remove `cloud.zylosoft.online` from every `server_name` line it appears in:
 
 ```bash
 sudo nano /etc/nginx/sites-available/default
@@ -573,11 +693,11 @@ sudo nano /etc/nginx/sites-available/default
 
 Change every occurrence of:
 ```
-server_name yourDomain.com cloud.yourDomain.com www.yourDomain.com;
+server_name zylosoft.online cloud.zylosoft.online www.zylosoft.online;
 ```
 to:
 ```
-server_name yourDomain.com www.yourDomain.com;
+server_name zylosoft.online www.zylosoft.online;
 ```
 
 Save, then test and reload:
@@ -587,11 +707,13 @@ sudo nginx -t
 sudo systemctl reload nginx
 ```
 
-`nginx -t` should show no warnings. If it still shows `conflicting server name`, check the default config again for any remaining `cloud.yourDomain.com` entries.
+`nginx -t` should show no warnings. If it still shows `conflicting server name`, check the default config again for any remaining `cloud.zylosoft.online` entries.
+
+> **Nginx fails after editing default config:** If you see `cannot load certificate "/etc/letsencrypt/live/zylosoft.online/..."` or any other wrong domain in the error, it means the default config still has old domain names in the ssl_certificate paths. Open `/etc/nginx/sites-available/default` and replace every occurrence of the old domain with your actual domain.
 
 ### 8.4 Complete the web installer
 
-Visit `https://cloud.yourDomain.com`:
+Visit `https://cloud.zylosoft.online`:
 
 1. Enter an admin username
 2. Enter a strong password
@@ -609,12 +731,12 @@ Visit `https://cloud.yourDomain.com`:
 sudo nano /usr/local/bin/server-status.sh
 ```
 
-Paste the following — replace `yourDomain.com` with your actual domain:
+Paste the following — replace `zylosoft.online` with your actual domain:
 
 ```bash
 #!/bin/bash
 OUTPUT="/var/www/html/status.html"
-DOMAIN="yourDomain.com"
+DOMAIN="zylosoft.online"
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S %Z')
 HOSTNAME=$(hostname)
 
@@ -771,7 +893,7 @@ Select nano (option 1), add this line at the bottom:
 
 Save with `Ctrl+O` → Enter → `Ctrl+X`.
 
-> **Status page shows wrong domain name.** If the status page shows a different domain (e.g. `yourDomain.com` instead of your domain), edit the script and update the DOMAIN variable: `sudo nano /usr/local/bin/server-status.sh`, then run `sudo /usr/local/bin/server-status.sh` to regenerate immediately.
+> **Status page shows wrong domain name.** If the status page shows a different domain (e.g. `zylosoft.online` instead of your domain), edit the script and update the DOMAIN variable: `sudo nano /usr/local/bin/server-status.sh`, then run `sudo /usr/local/bin/server-status.sh` to regenerate immediately.
 
 ---
 
@@ -802,7 +924,7 @@ sudo ss -tulnp | grep -E '80|443|9987|51820|30000'
 Test HTTPS:
 
 ```bash
-curl -sI https://yourDomain.com | head -5
+curl -sI https://zylosoft.online | head -5
 ```
 
 Should return `HTTP/1.1 200 OK`.
