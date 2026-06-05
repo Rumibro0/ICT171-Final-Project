@@ -11,6 +11,14 @@
 
 ---
 
+## Suggestions
+
+Make Sure to replace `zylosoft.online` with your actual domain and `20.2.80.253` with your actual IP Address in this documentation. This will be very helpful to prevent from any **errors**.  
+
+Also make sure to change the `Zylosoft` in the website source files with your project's or domain's name.
+
+---
+
 ## Quick Reference
 
 | Item | Value |
