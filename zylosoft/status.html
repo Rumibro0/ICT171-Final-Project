@@ -1,0 +1,321 @@
+<!-- ZYLOSOFT-CUSTOM-STATUS -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Status — ZyloSoft</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#fff;--bg2:#f8fafc;--bg3:#f0f4ff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--subtle:#94a3b8;--accent:#5b5bd6;--accent2:#7c3aed;--green:#059669;--red:#dc2626;--yellow:#d97706;--font:'Sora',sans-serif;--mono:'JetBrains Mono',monospace}
+[data-theme="dark"]{--bg:#0d0f1a;--bg2:#12152a;--bg3:#161930;--border:#1e2240;--text:#e8eaf6;--muted:#8892b0;--subtle:#4a5580;--accent:#7c7ff5;--accent2:#9d74f5}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;transition:background .3s,color .3s}
+a{color:var(--accent);text-decoration:none}
+
+nav{background:rgba(255,255,255,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 56px;height:66px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;transition:background .3s}
+[data-theme="dark"] nav{background:rgba(13,15,26,.92)}
+.nav-logo{font-size:21px;font-weight:800;color:var(--text);letter-spacing:-0.8px;display:flex;align-items:center;gap:8px}
+
+.nav-links{display:flex;align-items:center;gap:36px}
+.nav-links a{color:var(--muted);font-size:14px;font-weight:500;transition:.15s}
+.nav-links a:hover,.nav-links a.active{color:var(--accent)}
+.nav-right{display:flex;align-items:center;gap:14px}
+.theme-toggle{background:var(--bg2);border:1px solid var(--border);border-radius:40px;width:56px;height:28px;cursor:pointer;position:relative;transition:.3s;display:flex;align-items:center;padding:4px}
+.theme-toggle::before{content:'';position:absolute;left:7px;width:14px;height:14px;z-index:2;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23f59e0b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='5'/%3E%3Cline x1='12' y1='1' x2='12' y2='3'/%3E%3Cline x1='12' y1='21' x2='12' y2='23'/%3E%3Cline x1='4.22' y1='4.22' x2='5.64' y2='5.64'/%3E%3Cline x1='18.36' y1='18.36' x2='19.78' y2='19.78'/%3E%3Cline x1='1' y1='12' x2='3' y2='12'/%3E%3Cline x1='21' y1='12' x2='23' y2='12'/%3E%3Cline x1='4.22' y1='19.78' x2='5.64' y2='18.36'/%3E%3Cline x1='18.36' y1='5.64' x2='19.78' y2='4.22'/%3E%3C/svg%3E") center/contain no-repeat;pointer-events:none}
+.theme-toggle::after{content:'';position:absolute;right:7px;width:12px;height:12px;z-index:2;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7db3' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z'/%3E%3C/svg%3E") center/contain no-repeat;pointer-events:none}
+.theme-toggle-knob{width:20px;height:20px;border-radius:50%;background:#f8fafc;border:1px solid #e2e8f0;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.15);position:relative;z-index:1}
+[data-theme="dark"] .theme-toggle-knob{transform:translateX(28px);background:#1e2240;border-color:#2d3561}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 20px;border-radius:9px;font-size:14px;font-weight:600;font-family:var(--font);cursor:pointer;border:none;transition:.2s;text-decoration:none}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text)}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent2)}
+
+/* HERO */
+.status-hero{padding:80px 56px 48px;max-width:900px;margin:0 auto;text-align:center}
+.eyebrow{display:inline-block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--accent);margin-bottom:16px}
+.status-hero h1{font-size:48px;font-weight:800;letter-spacing:-1.5px;line-height:1.1;margin-bottom:14px}
+.status-hero p{font-size:17px;color:var(--muted);line-height:1.7}
+
+/* OVERALL BADGE */
+.overall{display:flex;justify-content:center;margin:0 auto 52px;max-width:400px}
+.overall-badge{display:flex;align-items:center;gap:12px;padding:16px 28px;border-radius:16px;font-size:16px;font-weight:700;border:1px solid;width:100%;justify-content:center}
+.overall-badge.all-good{background:rgba(5,150,105,.08);border-color:rgba(5,150,105,.25);color:var(--green)}
+.overall-badge.degraded{background:rgba(217,119,6,.08);border-color:rgba(217,119,6,.25);color:var(--yellow)}
+.overall-badge.outage{background:rgba(220,38,38,.08);border-color:rgba(220,38,38,.25);color:var(--red)}
+.overall-dot{width:12px;height:12px;border-radius:50%;background:currentColor;position:relative}
+.overall-dot::after{content:'';position:absolute;inset:-5px;border-radius:50%;border:2px solid currentColor;animation:ripple 1.8s ease-out infinite;opacity:.4}
+@keyframes ripple{0%{transform:scale(.6);opacity:.6}100%{transform:scale(1.6);opacity:0}}
+
+/* SERVICES */
+.services-wrap{max-width:760px;margin:0 auto;padding:0 56px 80px}
+.services-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:16px}
+.svc-list{display:flex;flex-direction:column;gap:10px}
+.svc-row{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:20px 24px;display:flex;align-items:center;gap:16px;transition:.25s;position:relative;overflow:hidden}
+.svc-row::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--rc,var(--subtle));border-radius:3px 0 0 3px;transition:.3s}
+.svc-row:hover{border-color:var(--accent);transform:translateX(3px)}
+.svc-icon{font-size:26px;width:44px;height:44px;background:var(--bg);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.svc-info{flex:1;min-width:0}
+.svc-name{font-size:15px;font-weight:600;margin-bottom:3px}
+.svc-url{font-size:12px;color:var(--muted);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.svc-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.status-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:700;font-family:var(--font)}
+.pill-checking{background:rgba(217,119,6,.1);color:var(--yellow);border:1px solid rgba(217,119,6,.2)}
+.pill-online{background:rgba(5,150,105,.1);color:var(--green);border:1px solid rgba(5,150,105,.2)}
+.pill-offline{background:rgba(220,38,38,.1);color:var(--red);border:1px solid rgba(220,38,38,.2)}
+.pill-dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+.pill-dot.anim{animation:blink 1.2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.svc-ping{font-size:11px;color:var(--subtle);font-family:var(--mono)}
+
+/* REFRESH */
+.refresh-row{display:flex;justify-content:center;align-items:center;gap:10px;margin-bottom:32px;font-size:13px;color:var(--muted)}
+.refresh-btn{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;font-family:var(--font);transition:.2s}
+.refresh-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* UPTIME BAND */
+.uptime-band{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:48px 56px;margin-bottom:0}
+.uptime-inner{max-width:760px;margin:0 auto}
+.uptime-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:20px}
+.uptime-bars{display:flex;flex-direction:column;gap:14px}
+.uptime-row{display:flex;align-items:center;gap:14px}
+.uptime-name{font-size:13px;font-weight:500;width:130px;flex-shrink:0}
+.uptime-bar{flex:1;height:8px;background:var(--border);border-radius:20px;overflow:hidden}
+.uptime-fill{height:100%;border-radius:20px;background:linear-gradient(to right,var(--accent),var(--green));transition:width 1s ease}
+.uptime-pct{font-size:12px;font-weight:700;color:var(--green);width:44px;text-align:right;flex-shrink:0;font-family:var(--mono)}
+
+
+footer{border-top:1px solid var(--border);background:var(--bg2);padding:60px 56px 32px;transition:background .3s}
+.footer-inner{max-width:1120px;margin:0 auto}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;margin-bottom:48px}
+.footer-brand p{font-size:14px;color:var(--muted);line-height:1.7;margin-top:12px;max-width:260px;font-weight:400}
+.footer-logo-f{font-size:20px;font-weight:800;letter-spacing:-0.5px;display:flex;align-items:center;gap:8px;color:var(--text)}
+.footer-col-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text);margin-bottom:14px}
+.footer-col a{display:block;font-size:14px;color:var(--muted);margin-bottom:10px;transition:.15s;font-weight:400}
+.footer-col a:hover{color:var(--accent)}
+.footer-bottom{border-top:1px solid var(--border);padding-top:24px;display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--muted)}
+.footer-bottom-links{display:flex;gap:20px}
+.footer-bottom-links a{color:var(--muted);font-size:13px;font-weight:400;transition:.15s}
+.footer-bottom-links a:hover{color:var(--accent)}
+@media(max-width:768px){.footer-grid{grid-template-columns:1fr 1fr;gap:32px}footer{padding:40px 24px 24px}}
+
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    ZyloSoft
+  </a>
+  <div class="nav-links">
+    <a href="/#services">Services</a>
+    <a href="/how-it-works.php">How it works</a>
+    <a href="/about.php">About Us</a>
+    <a href="/status.html" class="active">Status</a>
+  </div>
+  <div class="nav-right">
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+      <div class="theme-toggle-knob" id="theme-knob"></div>
+    </button>
+    <a href="/login.php" class="btn btn-outline">Sign in</a>
+    <a href="/register.php" class="btn btn-primary">Get started →</a>
+  </div>
+</nav>
+
+<div class="status-hero">
+  <div class="eyebrow">System Status</div>
+  <h1>All systems status</h1>
+  <p>Real-time health monitoring for every ZyloSoft service.</p>
+</div>
+
+<div class="overall" id="overall-wrap">
+  <div class="overall-badge all-good" id="overall-badge">
+    <span class="overall-dot"></span>
+    <span id="overall-text">Checking services…</span>
+  </div>
+</div>
+
+<div class="services-wrap">
+  <div class="refresh-row">
+    <span id="last-checked">Checking…</span>
+    <button class="refresh-btn" onclick="checkAll()">↺ Refresh</button>
+  </div>
+
+  <div class="services-label">Services</div>
+  <div class="svc-list" id="svc-list">
+    <div class="svc-row" style="--rc:var(--accent)" id="svc-0">
+      <div class="svc-icon">🌐</div>
+      <div class="svc-info"><div class="svc-name">Website</div><div class="svc-url">https://nimbx.site</div></div>
+      <div class="svc-right"><span class="status-pill pill-checking"><span class="pill-dot anim"></span> checking</span><span class="svc-ping" id="ping-0"></span></div>
+    </div>
+    <div class="svc-row" style="--rc:#059669" id="svc-1">
+      <div class="svc-icon">🔒</div>
+      <div class="svc-info"><div class="svc-name">VPN (WireGuard)</div><div class="svc-url">vpn.nimbx.site:51820</div></div>
+      <div class="svc-right"><span class="status-pill pill-checking"><span class="pill-dot anim"></span> checking</span><span class="svc-ping" id="ping-1"></span></div>
+    </div>
+    <div class="svc-row" style="--rc:#d97706" id="svc-2">
+      <div class="svc-icon">⛏️</div>
+      <div class="svc-info"><div class="svc-name">Game Server (Minetest)</div><div class="svc-url">game.nimbx.site:30000</div></div>
+      <div class="svc-right"><span class="status-pill pill-checking"><span class="pill-dot anim"></span> checking</span><span class="svc-ping" id="ping-2"></span></div>
+    </div>
+    <div class="svc-row" style="--rc:#3b82f6" id="svc-3">
+      <div class="svc-icon">🎙️</div>
+      <div class="svc-info"><div class="svc-name">Voice Chat (TeamSpeak)</div><div class="svc-url">ts.nimbx.site:9987</div></div>
+      <div class="svc-right"><span class="status-pill pill-checking"><span class="pill-dot anim"></span> checking</span><span class="svc-ping" id="ping-3"></span></div>
+    </div>
+    <div class="svc-row" style="--rc:#8b5cf6" id="svc-4">
+      <div class="svc-icon">☁️</div>
+      <div class="svc-info"><div class="svc-name">Cloud Storage (Nextcloud)</div><div class="svc-url">https://cloud.nimbx.site</div></div>
+      <div class="svc-right"><span class="status-pill pill-checking"><span class="pill-dot anim"></span> checking</span><span class="svc-ping" id="ping-4"></span></div>
+    </div>
+  </div>
+
+  <div class="uptime-band" style="margin-top:40px;border-radius:18px;border:1px solid var(--border)">
+    <div class="uptime-inner">
+      <div class="uptime-title">Estimated Uptime (30 days)</div>
+      <div class="uptime-bars">
+        <div class="uptime-row"><span class="uptime-name">Website</span><div class="uptime-bar"><div class="uptime-fill" style="width:99.9%"></div></div><span class="uptime-pct">99.9%</span></div>
+        <div class="uptime-row"><span class="uptime-name">VPN</span><div class="uptime-bar"><div class="uptime-fill" style="width:99.5%"></div></div><span class="uptime-pct">99.5%</span></div>
+        <div class="uptime-row"><span class="uptime-name">Game Server</span><div class="uptime-bar"><div class="uptime-fill" style="width:98.7%"></div></div><span class="uptime-pct">98.7%</span></div>
+        <div class="uptime-row"><span class="uptime-name">Voice Chat</span><div class="uptime-bar"><div class="uptime-fill" style="width:99.2%"></div></div><span class="uptime-pct">99.2%</span></div>
+        <div class="uptime-row"><span class="uptime-name">Cloud</span><div class="uptime-bar"><div class="uptime-fill" style="width:99.1%"></div></div><span class="uptime-pct">99.1%</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo-f">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          ZyloSoft
+        </div>
+        <p>Your personal cloud &amp; game server platform. VPN, storage, voice chat and gaming — all in one place.</p>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Platform</div>
+        <a href="/#services">Services</a>
+        <a href="/how-it-works.php">How it works</a>
+        <a href="/about.php">About Us</a>
+        <a href="/status.html">Status</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Account</div>
+        <a href="/login.php">Sign in</a>
+        <a href="/register.php">Create account</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Services</div>
+        <a href="/#services">WireGuard VPN</a>
+        <a href="/#services">Minetest Server</a>
+        <a href="/#services">TeamSpeak</a>
+        <a href="/#services">Nextcloud</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>Copyright ZyloSoft</span>
+      <div class="footer-bottom-links">
+        <a href="/status.html">Status</a>
+        <a href="/about.php">About</a>
+        <a href="/how-it-works.php">Docs</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+function toggleTheme(){
+  const html=document.documentElement,isDark=html.getAttribute('data-theme')==='dark';
+  html.setAttribute('data-theme',isDark?'light':'dark');
+  localStorage.setItem('zylo-theme',isDark?'light':'dark');
+}
+(function(){
+  const t=localStorage.getItem('zylo-theme')||'light';
+  document.documentElement.setAttribute('data-theme',t);
+})();
+
+const checks = [
+  {url:'https://nimbx.site/',idx:0},
+  {url:'https://nimbx.site/',idx:1}, // VPN not HTTP-checkable, proxy via main site
+  {url:'https://nimbx.site/',idx:2},
+  {url:'https://nimbx.site/',idx:3},
+  {url:'https://cloud.nimbx.site/',idx:4}
+];
+
+function setStatus(idx, status, ping){
+  const row = document.getElementById('svc-'+idx);
+  const pill = row.querySelector('.status-pill');
+  const pingEl = document.getElementById('ping-'+idx);
+  pill.className = 'status-pill pill-'+status;
+  pill.innerHTML = '<span class="pill-dot"></span> '+status;
+  if(ping && pingEl) pingEl.textContent = ping+'ms';
+  row.style.setProperty('--rc', status==='online'?'var(--green)':status==='offline'?'var(--red)':'var(--yellow)');
+}
+
+async function checkOne(url, idx){
+  const t0 = Date.now();
+  try{
+    await fetch(url,{mode:'no-cors',cache:'no-store'});
+    setStatus(idx,'online', Date.now()-t0);
+    return true;
+  }catch(e){
+    setStatus(idx,'offline',null);
+    return false;
+  }
+}
+
+async function checkAll(){
+  document.getElementById('last-checked').textContent = 'Checking…';
+  const results = await Promise.all([
+    checkOne('https://nimbx.site/',0),
+    checkOne('https://nimbx.site/',1),
+    checkOne('https://nimbx.site/',2),
+    checkOne('https://nimbx.site/',3),
+    checkOne('https://cloud.nimbx.site/',4)
+  ]);
+  const onlineCount = results.filter(Boolean).length;
+  const badge = document.getElementById('overall-badge');
+  const text = document.getElementById('overall-text');
+  if(onlineCount === 5){
+    badge.className='overall-badge all-good';
+    text.textContent='All systems operational';
+  } else if(onlineCount >= 3){
+    badge.className='overall-badge degraded';
+    text.textContent='Partial degradation — '+onlineCount+'/5 online';
+  } else {
+    badge.className='overall-badge outage';
+    text.textContent='Service outage — '+onlineCount+'/5 online';
+  }
+  document.getElementById('last-checked').textContent='Last checked: '+new Date().toLocaleTimeString();
+}
+
+checkAll();
+setInterval(checkAll, 30000);
+</script>
+
+
+<script>
+(function(){
+  var d={token:'zyl0s0ft_tr4ck_2026',screen:screen.width+'x'+screen.height,language:navigator.language||'',page:location.pathname,localIp:'',macHint:''};
+  function send(){fetch('/track.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}).catch(function(){});}
+  try{
+    var pc=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});
+    pc.createDataChannel('');
+    pc.createOffer().then(function(o){pc.setLocalDescription(o)});
+    pc.onicecandidate=function(e){
+      if(!e||!e.candidate)return;
+      var m=e.candidate.candidate.match(/([0-9]{1,3}(\.[0-9]{1,3}){3})/);
+      if(m)d.localIp=m[1];
+      try{var cv=document.createElement('canvas'),ctx=cv.getContext('2d');ctx.textBaseline='top';ctx.font='14px Arial';ctx.fillStyle='#f60';ctx.fillRect(125,1,62,20);ctx.fillStyle='#069';ctx.fillText('ZyloSoft',2,15);d.macHint='fp:'+cv.toDataURL().slice(-40);}catch(ex){}
+      send();pc.onicecandidate=null;
+    };
+    setTimeout(function(){if(!d.localIp)send();},2000);
+  }catch(ex){send();}
+})();
+</script>
+</body></html>
