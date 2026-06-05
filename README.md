@@ -16,7 +16,7 @@
 | Item | Value |
 |------|-------|
 | Public IP Address | `20.2.80.253` |
-| Domain Name | `yourDomain` |
+| Domain Name | `zylosoft.online` |
 | GitHub Repository | `https://github.com/rumibro0/ICT171-Final-Project` |
 | Video Explainer | `https://youtu.be/[your-video-id]` |
 | Status Page | `https://zylosoft.online/status.html` |
