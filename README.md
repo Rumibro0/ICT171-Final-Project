@@ -1095,7 +1095,6 @@ In accordance with Murdoch University's policy on the use of generative AI tools
 | Tool | Purpose | Sections Affected |
 |------|---------|-------------------|
 | Claude (Anthropic) | Website and portal UI design assistance — generating HTML/CSS layout and styling for the web portal and status dashboard | Step 2.1 (index.html), Step 9 (status page HTML), Step 11 (ZyloSoft portal) |
-| Claude (Anthropic) | Troubleshooting guidance during server setup — diagnosing configuration errors and suggesting fixes |
 
 ---
 
