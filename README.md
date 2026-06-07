@@ -26,7 +26,7 @@ Also make sure to change the `Zylosoft` in the website source files with your pr
 | Public IP Address | `20.2.80.253` |
 | Domain Name | `zylosoft.online` |
 | GitHub Repository | `https://github.com/rumibro0/ICT171-Final-Project` |
-| Video Explainer | `https://youtu.be/[your-video-id]` |
+| Video Explainer | `[Google Drive Link](https://drive.google.com/file/d/15uc6qbksTv5vFal2FsOWi_QjjF6EQ78Q/view?usp=drive_link)` |
 | Status Page | `https://zylosoft.online/status.html` |
 
 ---
